@@ -1,0 +1,483 @@
+Architecture Canvas
+~~~~~~~~~~~~~~~~~~~
+
+
+
+____________________________________________________________________________________________________________________________________________________________
+
+Reuseable Services
+~~~~~~~~~~~~~~~~~~
+
+Foundation Layer 
+----------------
+
+Connectivity to the external systems and extend your framework.[ Integration Services (External Producers, Corporate DB), NFRs]. Business Ignostic
+
+Core Layer
+----------
+
+Services Around the Business Concepts [API (External consumers), Core Services]. System Ignostic. 
+
+Non-Reuseable Services
+~~~~~~~~~~~~~~~~~~~~~~
+
+End-User Layer
+--------------
+
+Provide Functionality to End users User [Interface and Processes (Intranet and Extranet users)].
+
+____________________________________________________________________________________________________________________________________________________________
+
+Business Drives The Architecture Design > Translate Business Needs and Concepts > Scalabe and Independent Per Line Of Business (LOB)
+
+
+->DISCLOSE  <> ORGANIZE > ASSEMBLE >-
+!----------------------------------!
+
+
+1.DISCLOSE 
+~~~~~~~~~~
+
+	-Business Concepts, Integration Needs and Non-Functional Requirements Are Disclosed.
+
+	* User Stories, Personas and Roles
+	* Information Architecture
+	* Integration Technology
+	* User Experience And Expectations (Type Of Channels Is Mobile Only or Web)
+	
+2.ORGANIZE
+~~~~~~~~~~
+
+	-Here The Concepts are added To The Layers of Architecture Canvas.
+	-Both ORGANIZE and DISCLOSE in the Form of ITERATION
+
+	* In EndUser Layer the Interface and Process are There.
+	* In Core Layer Business Services Are There. -Reuseable
+	* In Foundation Layer Non Functional Requirements are There. -Reuseable
+ b
+
+2.ASSEMBLE
+~~~~~~~~~~
+	
+	-Here The Concepts are Assembled Into Modules.
+
+	* Join Conceptually Releated Concepts.
+	* Don't Join Concepts WIth Different Lifecycles. Even If They are Releated.  
+	* Isolate Reuseable Logic From The Integration Logic (In Core Layer).
+	* Apply Known Design Patterns
+
+____________________________________________________________________________________________________________________________________________________________
+
+Naming Conventions
+==================
+
+	Why Its Important to Adopt Naming Convention ?
+		
+		+ Reveal The Nature Of Each Module.
+		+ Enforce Refrence Architecture.
+		+ Normalize Known Patterns.
+
+Foundation Modules
+~~~~~~~~~~~~~~~~~~    
+
+	* Module_Lib  - Genric Library Module.
+	* Module_IS   - Technical Wrapper to Consume and Normalize an External Service.
+	* Module_Drv  - Integrations with diff systems that performs same type of operations. (eg : Drivers for Different Printers)
+	* Module_Th   - Theme,Look and Feel Elements,menu,...
+	* Module_Pat  - Reuseable UI patterns for Layout Only.
+	* Module_Plug - Reuseable Mobile Plugin service.
+	* Module_MTh  - Mobile Theme
+	* Module_MPat - Mobile Pattern
+
+Core Modules
+~~~~~~~~~~~~ 
+
+	* Module_CS   - Reuseable Core Services with public entities and actions.
+	* Module_BL   - Isolated Business Logics(Actions) to manage complexity, composition or to have its own lifecycle.
+	* Module_CW   - Core widgets(Blocks) to manage complexity, composition or to have its own lifecycle.
+	* Module_Eng  - Calculation Engines if it performs complex Calculations.
+	* Module_Sync - Logic to Synchronize data in CSs with an external systems.
+	* Module_API  - Technical Wrapper to expose an API to external consumers.
+	* Module_MCS  - Mobile Core Service
+	* Module_MBL  - Mobile Business Logic
+	* Module_MCW  - Mobile Core Widgets
+
+End-User Modules
+~~~~~~~~~~~~~~~~ 
+
+	* Just Remove the Space in Module Name
+
+____________________________________________________________________________________________________________________________________________________________
+
+Typical Module Elements
+=======================
+
+Typical Elements of Foundation Module 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	-Data
+		* Structure For Input and Output to Handle Data Exchange with External Systems
+		* Non- Core Entities
+
+	-Logic
+		* Normalized APIs (Consume From External)
+		* Exception Handling (avoid Error Codes)
+		* Single Sign On and Session Logic
+		* Common Roles To a Domain Of Users
+
+	-Interface
+
+		* UI Patterns or Blocks (eg : Calendar, Accordian)
+		* Themes, Layouts and Exception Flows
+
+
+Typical Elements of Core Modules 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	-Data
+		* Core Business Entities Should Live Here. These Core Entities Exposed as Read Only (master and associated details).
+
+	-Logic
+		* Core Actions For Business Entities.
+		* Audit Trails an integration Logic (wraps the integration services logic from the Foundation layer)
+		* Roles define service-specific access to features.
+
+	-Interface
+
+		* Business Blocks
+
+	-Processes
+
+		* Asynchronous Data Processing (classification, data sync, counting,.. for aggregate info) Use Both Timers and Processes.
+
+
+Typical Elements of End-User Modules 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	-Data
+		* Auxiliary Entities to Save UI Status or Temporary Form Data.
+		* Auxiliary Form Data.
+	-Logic
+		* Business Logic To Support Specific Use Cases (not to be reused) eg: Form Validation.
+
+	-Interface
+
+		* Role Based UI to Support use cases. 
+
+	-Processes
+
+		* Workflow Definitions to support Use Cases in an End User Module.
+
+____________________________________________________________________________________________________________________________________________________________
+	
+Example Typical Module Elements -  Doctors App
+===============================
+
+Foundation Layer
+~~~~~~~~~~~~~~~~~
+	
+	*DoctorApp_MTh / Planner_Th
+
+		- Logic - Common Roles, Common Login Logic built-In.
+		- Interface - Layouts, Exception Flows, Mobile Login UI/Web Login UI
+	
+	
+	*PushNotifications_Plugin
+
+		- Data - Input/Output Structures, Device Specs Entity(UID, Model, SO Version).
+		- Logic - Notification Actions, Validation Actions.
+	
+
+	*GoogleCalendar_IS
+
+		- Data - Input/Output Structures, Calendar Entity.
+		- Logic - Calendar CRUD Operations, Normalized APIs, Exception Handlers.
+		- Interface - Reuseable UI Widget.
+
+
+	*TextMessage_IS
+
+		- Data - Input/Output Structures, Text Message Config Entity.
+		- Logic - CRUD Server Actions, Normalized APIs, Exception Handlers.
+
+
+Core Layer
+~~~~~~~~~~
+	
+	*Doctor_MBL
+
+		- Data - Optimized Local Storage, Specific Screen Data(temp), Session Info, Reg Process, Entity Should be Read Only.
+		- Logic - CRUD server Actions, Check Role Actions, Sync Logic to implement hot/cold  cache.
+		- Processes - Clean Up Tasks.
+
+	*Appointment_BL
+
+		- Data - Public (Read-Only) Appointment Data.
+		- Logic - Appointment Logic Actions, CRUD Actions, Business Rule Actions.
+
+	*Hospital_CS, Doctor_CS, Exam_CS, Patient_CS
+
+		- Data - Public (Read-Only) Business Entities.
+		- Logic - CRUD Actions, Business Logic.	
+
+	*Doctor_MCW, Appointment_CW
+
+		- Logic - Logic Actions (Form Validations), Bsiness Rules Actions.
+		- Interface - Reuseable UI blocks.
+
+End-User Layer
+~~~~~~~~~~~~~~
+	
+	*DoctorApp / AppointmentPlanner
+
+		- Data - Auxiliary Structures, only temp data to support temporary status / info.
+		- Logic - Screen Validations Actions.
+		- Interface - Mobile Screens / Web Screens.
+
+____________________________________________________________________________________________________________________________________________________________
+
+Application Composition
+=======================
+
+ In outsystems when you deploy your code to the quality or production environments, you actually deploy applications.
+
+	Foundation App 
+
+		-If the app Only contains the foundation module, then it is  a Foundation App.
+
+	Core App
+
+ 		-Core Module = Core App
+		-Core Module + Foundation Module = Core App.
+
+	End-User App
+
+ 		-End-User Module = End-User App
+ 		-End-User Module + Core Module = End-User App
+		-End-User Module + Foundation Module = End-User App.
+ 		-End-User Module + Core Module + Foundation Module = End-User App.
+ 
+Benifits
+~~~~~~~~
+	- Sound
+	- Easy To Deploy
+	- Maintainable
+____________________________________________________________________________________________________________________________________________________________
+
+Validating Architecture For Modules
+===================================
+	
+	Why Validate an Architecture ?  
+
+	Ans : Build Apps Fast, Build the Right, Build them for Future.
+	- Promotes Abstraction of Reuseable Services.
+	- Optimize Lifecycle Independence.
+	- Minimize Impact Of Changes.
+	- Avoid Poor Service Abstraction.
+	- Stop Unmanageable Dependencies.
+	- Prevent Slow Deployments	
+
+	
+	After Designing the Architecture and placing the Modules in thr correct layer of the canvas, you need to validate what you created to make sure your 
+	architecture is sound.
+	
+	- RULE NO : 1  - No Upward Refrences. 
+		(An Upward Refrence Can Create Cluster Where any two modules can directly or indirectly have circular dependency.
+	
+	- RULE NO : 2 - No Side Refrences Between End-User Modules. (Screen Refrences are Allowed Between End-User Modules [Ref Doc Strong/Weak Ref).
+			This Rule Ensures The Module Correctly Isolated and allowing them to have different Life-Cycles.
+	- RULE NO : 3 - No Circular Refrences
+			If You Follow the 1st RULE You should not have any cyclic refrences between Modules in Different Layers 
+			If You Follow the 2st RULE Prevent Cycle From the End-User Modules.
+			No Circular Refrences in the Core and Foundation Modules.
+			In Core Layer No Front End Screens, Read-only Entities.
+			In Foundation Layer No Busines Logic, No core Entities (Non Functional Reqirements Harded Entities).
+
+	
+	Validating Rules For Apps
+		
+		RULE NO 1 : Layer Your Modules Correctly (If tjis points not applied correctly application composition failed).
+		RULE NO 2 : Layer Application Correctly. (End-User Applications Should not Provide Services To Another Applications).
+		RULE NO 3 : Donot mix Owners in Applications. (Clearly define Owners It's Key For Accountability)
+		RULE NO 4 : Donot mix sponsors. Each LOB Deployed Independently. (Each LOB has Diff Sponcers) 
+		
+
+____________________________________________________________________________________________________________________________________________________________
+
+
+Validation Tools
+================
+
+	These Tools Automatically will Perform an analysis on your modules and applications, allowing you to then check findings and understand how you can 
+	mitigate them to make sure your applications are sound and performant.
+	
+	 QN : Why Use Validation Tools ?  
+	Ans : Using tools To Inspect your apps and modules makes validation Faster, Safer, More Efficient.
+	
+	Validation Tools : 1. Discovery  2. AI Mentor Studio.
+
+	1. DISCOVERY is a visual Tool to help analyze, measure and understand how to improve your architecture. 
+	   It is Used To Validate Your Application and Modules.
+
+		- It Provides Visualization of Modules automatically classified in the architecture canvas layer based on their naming conventions.
+		- We can manually change the module to different layer at any time.
+		- In Each Module You can see the No Of Consumer Modules and Producers.
+		- We can Identify the dependency and modules consumed from others.
+		- Change Naming Conventions For Find in Configurations Tab. and click "Auto Classify" Button.
+		- If Need to Refresh The Analysis Click "Capture New Snapshot" Under Snapshot Tab then it capture new sapshot of the Environment.
+		- Also View For Applications dependencies and validation rules are not being applied.
+
+	2.AI Mentor Studio (Free for customers & fully maintained by OS)
+
+		- It Is a Tool to Monitor the Outsystems Technical Debt. It Enables Users to Visualize Their Application Portfolio to Identify Problems. 
+		- Types Of Analysis are I) Code Analysis II) Runtime Performance Analysis (Using Analytics Data From Lifetime).
+		- The Tool Follows Color code of 5 Levels.
+		- High Agility : GREEN (Lower Technical Debts), LOW Agility : Red (Higher Technical Debts).
+		- Higher Level Of Agility is Better. (Because it has Smaller amount of code patterns found or patterns are not impactful of others)
+		- AI Mentor Studio Should Not Fix the Findings Automatically that's up to the Developers.
+		- Also Provides View Of an Module Of Each Applications.
+		- Higher Technical Debt means the app is Manifasting higher number or more severe issues.(Issues Can be Relate with perfomance, security,
+		  Architecture or Maintainability)
+		- AI Mentor Studio not fix the findings automatically that's upto the Developer.
+		- 1. Open App Report 2. Open Modules > Open Module Report
+
+	Qn  : Who is it For ?
+	Ans : For Architects It will help to check the Technical Debts of All the Apps, Infrastructure and Understand How Architecture Is Evolving.
+      	      For TechLeads It will help to check the Technical Debts of Their Teams Apps
+	      For Developers It will help to Find and Fix the Technical Debts, To Follow Best Practice.
+
+
+Balance...
+
+____________________________________________________________________________________________________________________________________________________________
+
+Module Patterns
+===============
+
+
+Library Module Patterns
+~~~~~~~~~~~~~~~~~~~~~~~
+	
+	1.Extension Pattern
+
+		[Wrap an External Library (Action & Ip/Op Structures), Wrap Entities From an External Database]
+
+	2.Connector Pattern
+
+		The Pattern With Two Modules
+
+			a. The Extension Module that can be used to Encapsulate an External API
+				Match Usecases And Concepts, Original API
+
+			b. The Wrapper Module to Expose the Normalized API to the Consumers.
+				Match Usecases And Concepts, Shared Session Management, Normalize Business Concepts
+
+	3.API Granularity
+		
+		A. SAP_IS-----> SAP - Hundreds of APIs and Structures
+		B. Split SAP into [SAP_Fin_Is, SAP_HR_Is, SAP_MM_Is] To Balance Granularity and Avoid a single Bottleneck that affects too many consumers.
+
+Core Module Patterns
+~~~~~~~~~~~~~~~~~~~~
+
+	Typical Elements Of Core Business Modules
+		
+		Business Blocks
+		Change Operations on Core Entities
+		Async Data Processing(Classification, dataSync, Counting)
+		Permission to Define Special Specific Access to Features (Roles).
+	
+	1.Core Entity Pattern (CRUD of Entity Used By Several Apps)
+	2.External Core Service (ECS) Pattern.
+		a.External Core Service
+		b.ECS With Local Replica
+		c.ECS with Sync 
+
+	3.ECS Variations : Direct Integration & pub-sub(ESB)
+	4. Summary Cache Only
+		
+	4.Transparency service Pattern.
+	
+
+
+____________________________________________________________________________________________________________________________________________________________
+
+Refactoring An Application
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	At the Time of Refactoring We should create only Refactoring not Including any New Development.
+	It's Important to Take Refactoring Changes to the production before adding any new Developments.
+
+	Fix Voilations By the Order of their Impact
+		       
+		1. Upper and Side Voilations To Orchestrators
+		2. Upper and Side Voilations To Endusers. - Consuming Endusers Prevents sound Tree-shaped Hierarchies beneath Each Enduser.
+		3. Direct Cycles Between Cores. - Less Impact as it Creates Smaller Clusters limited to core/library modules.
+		4. Upper Voilation To Cores - Poor Isolation of Libraries, that unexpectedly pull clusters of core/Library Modules along.
+		5. Direct Cycles Between Libraries -Impact Typically Limited to the Involved modules, as they are in the bottom of the Hierarchy.
+
+	***IMP Inside Each Category, Pick the Module with the most Consumers first, as it will solve more conflicts.***
+	Discovery Tool Help for this.
+
+
+____________________________________________________________________________________________________________________________________________________________
+
+
+Style Guide
+===========
+
+		- A Style guide works as a tool and  a guide for UI/UX Designers and developers when  they designing and implementing apps.
+		- It Defines a brand's Visual Communication.
+
+		What is Style Guide ?
+ 
+			A Document that Establishes a clear, consistent and unique visual form of communicating brand.
+
+		What is Live Style guide ?
+
+			Ans : It's an Instantiation of Style Guide. A Live Documentation with brand theme, color, patterns.
+		
+		Outsystems UI : It is a Framework that provides series a of elements to help to create Reactive Web and Mobile Apps.(Three Elements)
+
+		The Theme 	    - For the Look and Feel of your applications.( Which Includes Screen Layouts, The global Stylesheet and grid definitions.)
+		The Templates 	    - Defines the Structure of the application modules.
+				      (It contains Screen Definitions and provides basic set of functinalities, Including Authnetication)
+		Patterns(or blocks) - Provide Common and Reuseable UI Functionality.
+				      (Chat Message, date picker and carousel are few examples.)
+
+		Theme 	         : The Main Reuseable Theme Contains the main css styles and classes.
+		Template     	 : The Template Module Contains the base Definition. Contains common Layouts, Menu, Login and a Refrence to the Theme.
+			   	   (can be share between Selevral Applications)
+		Patterns   	 : The Patterns Include UI and Widgets That are Standard Reuseable Components.
+		Live Style Guide : The Live Style Guide Includes The Screen Examples. So Developers Can Understand Style Guide's Look and Patterns.
+
+		Why Style Guide Architecture Is Important ?
+
+			- It Terms Of performance, It's Important to load only the Necessary Resources Such as Images, CSS, JS.
+			- All Apps Can Easily Adopt The Same Style Guide, Reducing Long-term Maintainence and Refactoring due to the fact that all look 
+			  and feel assets are centralized.
+			- It will also help Development by Reducing the dispersion of the look and feel code across several modules and preventing Custom 
+			  In-Line CSS Styles Across All Modules.
+
+		Four Types of Style Guides
+
+			1. Built-In Style Guide
+			2. Specialize a Built-In
+			3. Clone a Built-In
+			4. Build Your Own.
+
+		Built-In Style Guide
+
+			- The First UI Module will be a Clone of the Template.
+			- Includes Menu and Login Flow.
+			- Refrences The Outsystems UI Theme.
+			- Other Modules Created in the App Refrence the First Module.
+
+
+
+
+
+
+
+	
+		
